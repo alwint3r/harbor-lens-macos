@@ -1,0 +1,98 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "session_id": "sample-run-a",
+  "trajectory_id": "sample-trajectory-a",
+  "agent": {
+    "name": "harbor-agent",
+    "version": "1.4.0",
+    "model_name": "example/model-alpha"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "timestamp": "2026-05-14T09:30:00Z",
+      "source": "system",
+      "message": "You are working in a macOS project. Keep changes focused and **verify the build** before finishing."
+    },
+    {
+      "step_id": 2,
+      "timestamp": "2026-05-14T09:30:01Z",
+      "source": "user",
+      "message": "# Task\n\nUpdate the parser so it accepts an optional `notes` field.\n\n- Preserve existing behavior\n- Add a focused test"
+    },
+    {
+      "step_id": 3,
+      "timestamp": "2026-05-14T09:30:03Z",
+      "source": "agent",
+      "message": "I’ll inspect the parser and its tests before making the smallest change.",
+      "reasoning_content": "The request is narrow. I should locate the data model and existing decoding tests, then modify the concrete implementation rather than introducing a new abstraction.",
+      "reasoning_effort": "medium",
+      "tool_calls": [
+        {
+          "tool_call_id": "call-read-1",
+          "function_name": "read",
+          "arguments": {
+            "path": "Sources/Parser/Trajectory.swift"
+          }
+        },
+        {
+          "tool_call_id": "call-search-1",
+          "function_name": "search",
+          "arguments": {
+            "query": "TrajectoryTests",
+            "path": "Tests"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "call-read-1",
+            "content": "struct Trajectory: Decodable {\n    let agent: Agent\n    let steps: [Step]\n}\n"
+          },
+          {
+            "source_call_id": "call-search-1",
+            "content": "Tests/ParserTests/TrajectoryTests.swift:4:final class TrajectoryTests: XCTestCase {"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 4,
+      "timestamp": "2026-05-14T09:30:15Z",
+      "source": "agent",
+      "message": "Added the optional field and a decoding test. The existing build remains green.",
+      "reasoning_content": "The model can represent this directly as `String?`; no migration or helper type is needed.",
+      "tool_calls": [
+        {
+          "tool_call_id": "call-edit-1",
+          "function_name": "edit",
+          "arguments": {
+            "path": "Sources/Parser/Trajectory.swift",
+            "changes": ["Add let notes: String?"]
+          }
+        },
+        {
+          "tool_call_id": "call-test-1",
+          "function_name": "bash",
+          "arguments": {
+            "command": "swift test"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "call-edit-1",
+            "content": "Applied 1 change to Sources/Parser/Trajectory.swift"
+          },
+          {
+            "source_call_id": "call-test-1",
+            "content": "Building for debugging...\nBuild complete!\nTest Suite 'All tests' passed.\nExecuted 18 tests, with 0 failures in 0.42 seconds."
+          }
+        ]
+      }
+    }
+  ],
+  "notes": "Sample trajectory included for local UI testing."
+}

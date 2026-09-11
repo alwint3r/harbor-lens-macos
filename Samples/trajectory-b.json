@@ -1,0 +1,93 @@
+{
+  "schema_version": "ATIF-v1.7",
+  "session_id": "sample-run-b",
+  "trajectory_id": "sample-trajectory-b",
+  "agent": {
+    "name": "harbor-agent",
+    "version": "1.4.0",
+    "model_name": "example/model-beta"
+  },
+  "steps": [
+    {
+      "step_id": 1,
+      "timestamp": "2026-05-14T09:32:00Z",
+      "source": "system",
+      "message": "You are working in a macOS project. Keep changes focused and **verify the build** before finishing."
+    },
+    {
+      "step_id": 2,
+      "timestamp": "2026-05-14T09:32:01Z",
+      "source": "user",
+      "message": "# Task\n\nUpdate the parser so it accepts an optional `notes` field.\n\n- Preserve existing behavior\n- Add a focused test"
+    },
+    {
+      "step_id": 3,
+      "timestamp": "2026-05-14T09:32:02Z",
+      "source": "agent",
+      "message": "I’ll inspect the trajectory model and then update it.",
+      "reasoning_content": "This looks like a direct model change. Reading the source should be enough to identify the coding keys.",
+      "reasoning_effort": "low",
+      "tool_calls": [
+        {
+          "tool_call_id": "call-read-b",
+          "function_name": "read",
+          "arguments": {
+            "path": "Sources/Parser/Trajectory.swift"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "call-read-b",
+            "content": "struct Trajectory: Decodable {\n    let agent: Agent\n    let steps: [Step]\n}\n"
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 4,
+      "timestamp": "2026-05-14T09:32:09Z",
+      "source": "agent",
+      "message": "The model now accepts `notes`. I also ran the parser test suite successfully.",
+      "reasoning_content": "A focused parser test verifies both presence and omission of the optional field.",
+      "tool_calls": [
+        {
+          "tool_call_id": "call-edit-b",
+          "function_name": "edit",
+          "arguments": {
+            "path": "Sources/Parser/Trajectory.swift",
+            "changes": ["Add notes property", "Add CodingKeys case"]
+          }
+        },
+        {
+          "tool_call_id": "call-test-b",
+          "function_name": "bash",
+          "arguments": {
+            "command": "swift test --filter TrajectoryTests"
+          }
+        }
+      ],
+      "observation": {
+        "results": [
+          {
+            "source_call_id": "call-edit-b",
+            "content": "Applied 2 changes to Sources/Parser/Trajectory.swift"
+          },
+          {
+            "source_call_id": "call-test-b",
+            "content": "Build complete!\nExecuted 3 tests, with 0 failures in 0.19 seconds."
+          }
+        ]
+      }
+    },
+    {
+      "step_id": 5,
+      "timestamp": "2026-05-14T09:32:12Z",
+      "source": "agent",
+      "message": "One additional cleanup: the new test name now states the expected behavior explicitly.",
+      "tool_calls": []
+    }
+  ],
+  "notes": "Second sample with deliberate differences and one extra step."
+}
