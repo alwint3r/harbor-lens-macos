@@ -7,6 +7,14 @@ struct ToolCallView: View {
     var accent: Color = AppTheme.primary
     var compact = false
 
+    @AppStorage(AppSettings.renderBashOutputAsMarkdown) private var renderBashOutputAsMarkdown = false
+
+    /// Bash output is Markdown often enough (e.g. `cat README.md`) that the
+    /// user can opt into rendering it that way.
+    private var rendersMarkdownResults: Bool {
+        renderBashOutputAsMarkdown && toolCall.isBashCommand
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
@@ -50,7 +58,8 @@ struct ToolCallView: View {
                             ordinal: results.count > 1 ? index + 1 : nil,
                             baseURL: baseURL,
                             compact: compact,
-                            accent: accent
+                            accent: accent,
+                            rendersMarkdown: rendersMarkdownResults
                         )
                         if index < results.count - 1 { Divider() }
                     }
@@ -86,6 +95,7 @@ private struct ToolResultDisclosure: View {
     let baseURL: URL
     let compact: Bool
     let accent: Color
+    var rendersMarkdown = false
     var title = "Result"
 
     @State private var isExpanded = false
@@ -153,7 +163,15 @@ private struct ToolResultDisclosure: View {
         if let content = result.content {
             switch content {
             case .text(let text):
-                CodeBlock(content: text.isEmpty ? "Empty output" : text, maxHeight: compact ? 230 : 340)
+                if rendersMarkdown, !text.isEmpty {
+                    MarkdownOutputBlock(
+                        markdown: text,
+                        baseURL: baseURL,
+                        maxHeight: compact ? 230 : 340
+                    )
+                } else {
+                    CodeBlock(content: text.isEmpty ? "Empty output" : text, maxHeight: compact ? 230 : 340)
+                }
             case .parts:
                 RichContentView(content: content, baseURL: baseURL)
             }

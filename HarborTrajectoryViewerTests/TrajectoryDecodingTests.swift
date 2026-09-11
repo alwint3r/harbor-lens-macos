@@ -77,6 +77,32 @@ final class TrajectoryDecodingTests: XCTestCase {
         XCTAssertEqual(trajectory.steps[0].message.imageSources.first?.path, "screen.png")
     }
 
+    func testIdentifiesBashToolCalls() throws {
+        let json = #"""
+        {
+          "agent": {"name": "agent", "version": "1"},
+          "steps": [
+            {
+              "step_id": 1,
+              "source": "agent",
+              "message": "Run the checks.",
+              "tool_calls": [
+                {"tool_call_id": "c1", "function_name": "bash", "arguments": {"command": "cat README.md"}},
+                {"tool_call_id": "c2", "function_name": "Bash", "arguments": {"command": "ls"}},
+                {"tool_call_id": "c3", "function_name": "execute_bash", "arguments": {"command": "pwd"}},
+                {"tool_call_id": "c4", "function_name": "read", "arguments": {"path": "README.md"}}
+              ]
+            }
+          ]
+        }
+        """#
+
+        let trajectory = try JSONDecoder().decode(Trajectory.self, from: Data(json.utf8))
+        let calls = trajectory.steps[0].toolCalls
+
+        XCTAssertEqual(calls.map(\.isBashCommand), [true, true, true, false])
+    }
+
     func testLoaderRejectsTrajectoryWithoutSteps() throws {
         let json = #"{"agent":{"name":"agent","version":"1"},"steps":[]}"#
         let url = FileManager.default.temporaryDirectory

@@ -119,13 +119,6 @@ struct CodeBlock: View {
     let content: String
     var maxHeight: CGFloat = 240
 
-    private var preferredHeight: CGFloat {
-        let lines = max(1, content.reduce(1) { count, character in
-            character == "\n" ? count + 1 : count
-        })
-        return min(maxHeight, max(44, CGFloat(lines * 17 + 24)))
-    }
-
     var body: some View {
         ZStack(alignment: .topTrailing) {
             GeometryReader { proxy in
@@ -141,22 +134,10 @@ struct CodeBlock: View {
                         .frame(minWidth: proxy.size.width, alignment: .leading)
                 }
             }
-            .frame(height: preferredHeight)
+            .frame(height: textBlockHeight(for: content, maxHeight: maxHeight))
             .background(AppTheme.recessed)
 
-            Button {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(content, forType: .string)
-            } label: {
-                Image(systemName: "doc.on.doc")
-                    .font(.system(size: 11, weight: .medium))
-                    .padding(7)
-                    .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
-            }
-            .buttonStyle(.plain)
-            .padding(6)
-            .help("Copy")
-            .accessibilityLabel("Copy code")
+            CopyButton(content: content)
         }
         .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
         .overlay {
@@ -164,4 +145,59 @@ struct CodeBlock: View {
                 .stroke(AppTheme.separator.opacity(0.65), lineWidth: 1)
         }
     }
+}
+
+/// Scrollable panel that renders Markdown with the same chrome as `CodeBlock`.
+struct MarkdownOutputBlock: View {
+    let markdown: String
+    var baseURL: URL?
+    var maxHeight: CGFloat = 340
+
+    var body: some View {
+        ZStack(alignment: .topTrailing) {
+            ScrollView(.vertical) {
+                MarkdownText(markdown: markdown, baseURL: baseURL)
+                    .padding(12)
+                    .padding(.trailing, 26)
+            }
+            .frame(height: textBlockHeight(for: markdown, maxHeight: maxHeight))
+            .background(AppTheme.recessed)
+
+            CopyButton(content: markdown, name: "Markdown output")
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                .stroke(AppTheme.separator.opacity(0.65), lineWidth: 1)
+        }
+    }
+}
+
+private struct CopyButton: View {
+    let content: String
+    var name = "code"
+
+    var body: some View {
+        Button {
+            NSPasteboard.general.clearContents()
+            NSPasteboard.general.setString(content, forType: .string)
+        } label: {
+            Image(systemName: "doc.on.doc")
+                .font(.system(size: 11, weight: .medium))
+                .padding(7)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+        .padding(6)
+        .help("Copy")
+        .accessibilityLabel("Copy \(name)")
+    }
+}
+
+/// Approximates a sensible panel height for a block of text, capped at `maxHeight`.
+private func textBlockHeight(for content: String, maxHeight: CGFloat) -> CGFloat {
+    let lines = max(1, content.reduce(1) { count, character in
+        character == "\n" ? count + 1 : count
+    })
+    return min(maxHeight, max(44, CGFloat(lines * 17 + 24)))
 }

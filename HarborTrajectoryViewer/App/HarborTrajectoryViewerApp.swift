@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct HarborTrajectoryViewerApp: App {
     @StateObject private var model = AppModel()
+    @AppStorage(AppSettings.renderBashOutputAsMarkdown) private var renderBashOutputAsMarkdown = false
 
     var body: some Scene {
         Window("Harbor Lens", id: "main") {
@@ -44,6 +45,11 @@ struct HarborTrajectoryViewerApp: App {
                     model.closeAll()
                 }
                 .disabled(model.primary == nil)
+            }
+
+            CommandGroup(after: .toolbar) {
+                Toggle("Render Bash Output as Markdown", isOn: $renderBashOutputAsMarkdown)
+                    .keyboardShortcut("m", modifiers: [.command, .option])
             }
         }
     }

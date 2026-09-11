@@ -16,7 +16,7 @@ No third-party dependencies are required.
 3. Build and run with **⌘R**.
 4. Open a `trajectory.json`, then choose **Add comparison** (or press **⇧⌘O**) to load a second run.
 
-You can also drag one or two JSON files into the window. Tool results are collapsed by default; select **Show** on a result to inspect it.
+You can also drag one or two JSON files into the window. Tool results are collapsed by default; select **Show** on a result to inspect it. Bash output renders as monospaced text; turn on **Markdown output** in the toolbar (or **View ▸ Render Bash Output as Markdown**, **⌥⌘M**) to render it as Markdown instead.
 
 Two small ATIF fixtures are available in [`Samples/`](Samples/) for trying single-run and comparison modes.
 

@@ -129,6 +129,11 @@ struct ToolCall: Decodable, Hashable, Sendable, Identifiable {
 
     var id: String { toolCallID }
 
+    /// Shell calls whose text output is often Markdown, e.g. `bash` or `execute_bash`.
+    var isBashCommand: Bool {
+        functionName.lowercased().contains("bash")
+    }
+
     enum CodingKeys: String, CodingKey {
         case toolCallID = "tool_call_id"
         case functionName = "function_name"

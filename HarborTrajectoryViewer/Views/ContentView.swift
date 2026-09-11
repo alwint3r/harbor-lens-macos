@@ -3,6 +3,7 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @EnvironmentObject private var model: AppModel
+    @AppStorage(AppSettings.renderBashOutputAsMarkdown) private var renderBashOutputAsMarkdown = false
     @State private var isDropTarget = false
 
     var body: some View {
@@ -62,6 +63,12 @@ struct ContentView: View {
                         )
                     }
                     .help(model.comparison == nil ? "Open a second trajectory" : "Replace trajectory B")
+
+                    Toggle(isOn: $renderBashOutputAsMarkdown) {
+                        Label("Markdown output", systemImage: "textformat")
+                    }
+                    .toggleStyle(.button)
+                    .help("Render bash tool output as Markdown")
                 }
             }
         }
