@@ -21,11 +21,23 @@ struct TrajectoryHeaderView: View {
             .frame(width: 150, alignment: .leading)
 
             if let primary = model.primary {
-                LoadedFileSummary(trajectory: primary, label: "A", accent: AppTheme.primary)
-                    .contextMenu {
-                        Button("Replace Trajectory A…") { model.chooseFile(for: .primary) }
-                        Button("Show in Finder") { model.reveal(primary) }
+                HStack(spacing: 6) {
+                    LoadedFileSummary(trajectory: primary, label: "A", accent: AppTheme.primary)
+                        .contextMenu {
+                            Button("Replace Trajectory A…") { model.chooseFile(for: .primary) }
+                            Button("Show in Finder") { model.reveal(primary) }
+                            Divider()
+                            Button(model.isComparing ? "Close Trajectories" : "Close Trajectory") {
+                                model.close(.primary)
+                            }
+                        }
+
+                    CloseTrajectoryButton(
+                        help: model.isComparing ? "Close both trajectories" : "Close trajectory"
+                    ) {
+                        model.close(.primary)
                     }
+                }
             }
 
             Image(systemName: model.isComparing ? "arrow.left.arrow.right" : "plus")
@@ -51,14 +63,9 @@ struct TrajectoryHeaderView: View {
                 .help("Swap trajectories")
                 .accessibilityLabel("Swap trajectories")
 
-                Button {
+                CloseTrajectoryButton(help: "Close comparison") {
                     model.removeComparison()
-                } label: {
-                    Image(systemName: "xmark")
                 }
-                .buttonStyle(.borderless)
-                .help("Close comparison")
-                .accessibilityLabel("Close comparison")
             } else {
                 Button {
                     model.chooseFile(for: .comparison)
@@ -90,6 +97,20 @@ struct TrajectoryHeaderView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 11)
         .background(.bar)
+    }
+}
+
+private struct CloseTrajectoryButton: View {
+    let help: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "xmark")
+        }
+        .buttonStyle(.borderless)
+        .help(help)
+        .accessibilityLabel(help)
     }
 }
 

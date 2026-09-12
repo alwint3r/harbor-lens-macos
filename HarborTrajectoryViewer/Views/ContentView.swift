@@ -46,6 +46,8 @@ struct ContentView: View {
         }
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
+                RecentTrajectoriesMenu(model: model)
+
                 Button {
                     model.chooseFile(for: .primary)
                 } label: {

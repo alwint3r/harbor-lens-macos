@@ -14,7 +14,9 @@ No third-party dependencies are required.
 1. Open `HarborTrajectoryViewer.xcodeproj` in Xcode.
 2. Select the **HarborTrajectoryViewer** scheme.
 3. Build and run with **⌘R**.
-4. Open a `trajectory.json`, then choose **Add comparison** (or press **⇧⌘O**) to load a second run.
+4. Open a `trajectory.json`, then choose **Add comparison** (or press **⇧⌘O**) to load a second run. Click the **✕** next to trajectory A (or choose **Trajectory ▸ Close All Trajectories**) to close the loaded files and return to the start screen, where another file can be opened.
+
+Recently analyzed trajectories are listed on the start screen and under **File ▸ Open Recent** (also available from the toolbar clock menu). Select one to reopen it, or choose **Clear Menu** to empty the list. Job trials are labeled with their trial and job names.
 
 You can also drag one or two JSON files into the window. Tool results are collapsed by default; select **Show** on a result to inspect it. Bash output renders as monospaced text; turn on **Markdown output** in the toolbar (or **View ▸ Render Bash Output as Markdown**, **⌥⌘M**) to render it as Markdown instead.
 

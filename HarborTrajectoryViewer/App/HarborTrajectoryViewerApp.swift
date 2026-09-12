@@ -27,6 +27,10 @@ struct HarborTrajectoryViewerApp: App {
                 .disabled(model.primary == nil)
             }
 
+            CommandGroup(after: .newItem) {
+                RecentTrajectoriesMenu(model: model)
+            }
+
             CommandMenu("Trajectory") {
                 Button("Swap A and B") {
                     model.swapTrajectories()
