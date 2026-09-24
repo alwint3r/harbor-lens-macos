@@ -60,9 +60,27 @@ struct TrajectorySidebar: View {
             }
 
             HStack(spacing: 0) {
-                MetricValue(value: trajectory.trajectory.steps.count, label: "Steps")
-                MetricValue(value: trajectory.trajectory.agentTurnCount, label: "Turns")
-                MetricValue(value: trajectory.trajectory.toolCallCount, label: "Tools")
+                MetricValue(value: trajectory.trajectory.steps.count.formatted(), label: "Steps")
+                MetricValue(value: trajectory.trajectory.agentTurnCount.formatted(), label: "Turns")
+                MetricValue(value: trajectory.trajectory.toolCallCount.formatted(), label: "Tools")
+            }
+
+            HStack(spacing: 0) {
+                MetricValue(
+                    value: MetricFormat.tokens(trajectory.usage.promptTokens),
+                    label: "Prompts",
+                    emphasis: false
+                )
+                MetricValue(
+                    value: MetricFormat.tokens(trajectory.usage.completionTokens),
+                    label: "Completions",
+                    emphasis: false
+                )
+                MetricValue(
+                    value: MetricFormat.cost(trajectory.usage.costUSD),
+                    label: "Cost",
+                    emphasis: false
+                )
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -140,13 +158,16 @@ struct TrajectorySidebar: View {
 }
 
 private struct MetricValue: View {
-    let value: Int
+    let value: String
     let label: String
+    var emphasis = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(value.formatted())
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
+            Text(value)
+                .font(.system(size: emphasis ? 16 : 13, weight: .semibold, design: .rounded))
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
                 .contentTransition(.numericText())
             Text(label)
                 .font(.system(size: 9.5, weight: .medium))

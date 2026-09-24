@@ -162,6 +162,51 @@ struct Observation: Decodable, Hashable, Sendable {
     let results: [ObservationResult]
 }
 
+/// Per-step LLM usage recorded by the agent. All fields are optional because
+/// producers fill in only what their provider reports.
+struct StepMetrics: Decodable, Hashable, Sendable {
+    let promptTokens: Int?
+    let completionTokens: Int?
+    let cachedTokens: Int?
+    let costUSD: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case promptTokens = "prompt_tokens"
+        case completionTokens = "completion_tokens"
+        case cachedTokens = "cached_tokens"
+        case costUSD = "cost_usd"
+    }
+}
+
+/// Aggregate statistics for a whole trajectory, as written by the producer.
+struct FinalMetrics: Decodable, Hashable, Sendable {
+    let totalPromptTokens: Int?
+    let totalCompletionTokens: Int?
+    let totalCachedTokens: Int?
+    let totalCostUSD: Double?
+    let totalSteps: Int?
+
+    enum CodingKeys: String, CodingKey {
+        case totalPromptTokens = "total_prompt_tokens"
+        case totalCompletionTokens = "total_completion_tokens"
+        case totalCachedTokens = "total_cached_tokens"
+        case totalCostUSD = "total_cost_usd"
+        case totalSteps = "total_steps"
+    }
+}
+
+/// Token and cost totals for a trajectory, ready to display.
+struct TrajectoryUsage: Hashable, Sendable {
+    let promptTokens: Int?
+    let completionTokens: Int?
+    let cachedTokens: Int?
+    let costUSD: Double?
+
+    var isEmpty: Bool {
+        promptTokens == nil && completionTokens == nil && cachedTokens == nil && costUSD == nil
+    }
+}
+
 struct TrajectoryStep: Decodable, Hashable, Sendable, Identifiable {
     let stepID: Int
     let timestamp: String?
@@ -172,6 +217,7 @@ struct TrajectoryStep: Decodable, Hashable, Sendable, Identifiable {
     let reasoningContent: String?
     let toolCalls: [ToolCall]
     let observation: Observation?
+    let metrics: StepMetrics?
     let isCopiedContext: Bool?
     let llmCallCount: Int?
 
@@ -187,6 +233,7 @@ struct TrajectoryStep: Decodable, Hashable, Sendable, Identifiable {
         case reasoningContent = "reasoning_content"
         case toolCalls = "tool_calls"
         case observation
+        case metrics
         case isCopiedContext = "is_copied_context"
         case llmCallCount = "llm_call_count"
     }
@@ -202,6 +249,7 @@ struct TrajectoryStep: Decodable, Hashable, Sendable, Identifiable {
         reasoningContent = try container.decodeIfPresent(String.self, forKey: .reasoningContent)
         toolCalls = try container.decodeIfPresent([ToolCall].self, forKey: .toolCalls) ?? []
         observation = try container.decodeIfPresent(Observation.self, forKey: .observation)
+        metrics = try container.decodeIfPresent(StepMetrics.self, forKey: .metrics)
         isCopiedContext = try container.decodeIfPresent(Bool.self, forKey: .isCopiedContext)
         llmCallCount = try container.decodeIfPresent(Int.self, forKey: .llmCallCount)
     }
@@ -236,6 +284,7 @@ struct Trajectory: Decodable, Hashable, Sendable {
     let agent: AgentMetadata
     let steps: [TrajectoryStep]
     let notes: String?
+    let finalMetrics: FinalMetrics?
 
     enum CodingKeys: String, CodingKey {
         case schemaVersion = "schema_version"
@@ -244,6 +293,7 @@ struct Trajectory: Decodable, Hashable, Sendable {
         case agent
         case steps
         case notes
+        case finalMetrics = "final_metrics"
     }
 
     var toolCallCount: Int { steps.reduce(0) { $0 + $1.toolCalls.count } }
@@ -259,5 +309,30 @@ struct Trajectory: Decodable, Hashable, Sendable {
     func effectiveModel(for step: TrajectoryStep) -> String? {
         guard step.source.lowercased() == "agent" else { return nil }
         return step.modelName ?? agent.modelName
+    }
+
+    /// Token and cost totals for the run.
+    ///
+    /// `final_metrics` is authoritative when a producer writes it. Live
+    /// snapshots may not include it yet, so each missing total falls back to
+    /// the sum of the per-step metrics recorded so far.
+    var usage: TrajectoryUsage {
+        let stepMetrics = steps.compactMap(\.metrics)
+        return TrajectoryUsage(
+            promptTokens: finalMetrics?.totalPromptTokens ?? summed(stepMetrics.map(\.promptTokens)),
+            completionTokens: finalMetrics?.totalCompletionTokens ?? summed(stepMetrics.map(\.completionTokens)),
+            cachedTokens: finalMetrics?.totalCachedTokens ?? summed(stepMetrics.map(\.cachedTokens)),
+            costUSD: finalMetrics?.totalCostUSD ?? summed(stepMetrics.map(\.costUSD))
+        )
+    }
+
+    private func summed(_ values: [Int?]) -> Int? {
+        let present = values.compactMap { $0 }
+        return present.isEmpty ? nil : present.reduce(0, +)
+    }
+
+    private func summed(_ values: [Double?]) -> Double? {
+        let present = values.compactMap { $0 }
+        return present.isEmpty ? nil : present.reduce(0, +)
     }
 }

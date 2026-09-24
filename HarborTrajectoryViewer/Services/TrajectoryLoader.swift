@@ -18,7 +18,12 @@ enum TrajectoryLoadingError: LocalizedError {
 }
 
 enum TrajectoryLoader {
-    static func load(from url: URL) throws -> LoadedTrajectory {
+    /// Reads `url` and decodes it.
+    ///
+    /// Pass the identity of an already loaded trajectory to keep its `id`
+    /// stable, which lets a reload replace content without resetting the view
+    /// state that is bound to that identity.
+    static func load(from url: URL, id: UUID = UUID()) throws -> LoadedTrajectory {
         let data: Data
         do {
             data = try Data(contentsOf: url, options: [.mappedIfSafe])
@@ -42,6 +47,7 @@ enum TrajectoryLoader {
         let modifiedAt = attributes?[.modificationDate] as? Date
 
         return LoadedTrajectory(
+            id: id,
             url: url,
             trajectory: trajectory,
             byteCount: byteCount,

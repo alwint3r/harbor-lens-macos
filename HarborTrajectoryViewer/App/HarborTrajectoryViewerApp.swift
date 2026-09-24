@@ -52,6 +52,9 @@ struct HarborTrajectoryViewerApp: App {
             }
 
             CommandGroup(after: .toolbar) {
+                Toggle("Follow File Changes", isOn: $model.watchesFileChanges)
+                    .keyboardShortcut("l", modifiers: [.command, .option])
+
                 Toggle("Render Bash Output as Markdown", isOn: $renderBashOutputAsMarkdown)
                     .keyboardShortcut("m", modifiers: [.command, .option])
             }

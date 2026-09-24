@@ -16,9 +16,11 @@ No third-party dependencies are required.
 3. Build and run with **⌘R**.
 4. Open a `trajectory.json`, then choose **Add comparison** (or press **⇧⌘O**) to load a second run. Click the **✕** next to trajectory A (or choose **Trajectory ▸ Close All Trajectories**) to close the loaded files and return to the start screen, where another file can be opened.
 
-Recently analyzed trajectories are listed on the start screen and under **File ▸ Open Recent** (also available from the toolbar clock menu). Select one to reopen it, or choose **Clear Menu** to empty the list. Job trials are labeled with their trial and job names.
+Recently analyzed trajectories are listed on the start screen and under **File ▸ Open Recent** (also available from the toolbar clock menu). Select one to reopen it, or choose **Clear Menu** to empty the list. Job trials are labeled with their trial and job names. When the trajectory records usage, the sidebar's Run summary shows total prompt tokens, completion tokens, and cost in USD.
 
 You can also drag one or two JSON files into the window. Tool results are collapsed by default; select **Show** on a result to inspect it. Bash output renders as monospaced text; turn on **Markdown output** in the toolbar (or **View ▸ Render Bash Output as Markdown**, **⌥⌘M**) to render it as Markdown instead.
+
+Harbor Lens follows a trajectory that is still being written. While **Follow changes** is on (the default) in the toolbar, an open `trajectory.json` is reloaded whenever it changes on disk, so steps from a running trial appear as they are recorded. Turn it off from the toolbar or with **View ▸ Follow File Changes** (**⌥⌘L**) to keep the loaded content fixed.
 
 Two small ATIF fixtures are available in [`Samples/`](Samples/) for trying single-run and comparison modes.
 

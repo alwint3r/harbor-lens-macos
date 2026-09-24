@@ -51,6 +51,30 @@ enum AppTheme {
     }
 }
 
+/// Display formatting for usage totals. Missing values render as an em dash.
+enum MetricFormat {
+    static func tokens(_ value: Int?) -> String {
+        guard let value else { return "—" }
+        return value.formatted()
+    }
+
+    static func cost(_ value: Double?) -> String {
+        guard let value else { return "—" }
+        return value.formatted(.currency(code: "USD").precision(.fractionLength(2...4)))
+    }
+
+    /// One-line usage summary for narrow labels, e.g.
+    /// `prompt 14,858 · completion 64 · $0.00`. Nil when nothing was recorded.
+    static func usageSummary(_ usage: TrajectoryUsage) -> String? {
+        var parts: [String] = []
+        if let tokens = usage.promptTokens { parts.append("prompt \(tokens.formatted())") }
+        if let tokens = usage.completionTokens { parts.append("completion \(tokens.formatted())") }
+        if let total = usage.costUSD { parts.append(cost(total)) }
+        guard !parts.isEmpty else { return nil }
+        return parts.joined(separator: " · ")
+    }
+}
+
 struct EyebrowLabel: View {
     let text: String
     var color: Color = .secondary

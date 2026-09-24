@@ -66,6 +66,12 @@ struct ContentView: View {
                     }
                     .help(model.comparison == nil ? "Open a second trajectory" : "Replace trajectory B")
 
+                    Toggle(isOn: $model.watchesFileChanges) {
+                        Label("Follow changes", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                    .toggleStyle(.button)
+                    .help("Reload the file when it changes on disk")
+
                     Toggle(isOn: $renderBashOutputAsMarkdown) {
                         Label("Markdown output", systemImage: "textformat")
                     }

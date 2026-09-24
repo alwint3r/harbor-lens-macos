@@ -6,6 +6,9 @@ struct LoadedTrajectory: Identifiable, Hashable, Sendable {
     let trajectory: Trajectory
     let byteCount: Int64
     let modifiedAt: Date?
+    /// Token and cost totals, computed once per load so views can read them
+    /// without walking every step on each render.
+    let usage: TrajectoryUsage
 
     init(
         id: UUID = UUID(),
@@ -19,6 +22,7 @@ struct LoadedTrajectory: Identifiable, Hashable, Sendable {
         self.trajectory = trajectory
         self.byteCount = byteCount
         self.modifiedAt = modifiedAt
+        usage = trajectory.usage
     }
 
     var fileName: String { url.lastPathComponent }

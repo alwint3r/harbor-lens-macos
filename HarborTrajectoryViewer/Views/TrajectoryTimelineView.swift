@@ -233,10 +233,18 @@ private struct ComparisonColumnLabel: View {
                 .foregroundStyle(.white)
                 .frame(width: 20, height: 20)
                 .background(accent, in: RoundedRectangle(cornerRadius: 5))
-            Text(trajectory.displayModel)
-                .font(.system(size: 11.5, weight: .medium, design: .monospaced))
-                .lineLimit(1)
-                .truncationMode(.middle)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(trajectory.displayModel)
+                    .font(.system(size: 11.5, weight: .medium, design: .monospaced))
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                if let summary = MetricFormat.usageSummary(trajectory.usage) {
+                    Text(summary)
+                        .font(.system(size: 9.5, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity)
